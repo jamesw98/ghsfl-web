@@ -102,17 +102,17 @@
 @code {
 
     private List<Club> _clubs = new();
-    private Club _selectedClub;
+    private Club? _selectedClub;
     private Genders _gender;
     private int _round;
 
-    private MudTextField<string> _roundDescription;
-    private MudTextField<int> _roundNumber;
-    private string _roundDate;
-    private string _rosterDueDate;
-    private string _rosterDueTime;
-    private string _removeDueDate;
-    private string _removeDueTime;
+    private MudTextField<string>? _roundDescription;
+    private MudTextField<int>? _roundNumber;
+    private string? _roundDate;
+    private string? _rosterDueDate;
+    private string? _rosterDueTime;
+    private string? _removeDueDate;
+    private string? _removeDueTime;
 
     private async Task UploadFile(IBrowserFile file)
     {
@@ -156,6 +156,12 @@
         List<Fencer> newFencers = new();
         try
         {
+            if (_selectedClub == null)
+            {
+                SnackBar.Add("Please select a club", Severity.Error);
+                return;
+            }
+
             newFencers = await Roster.UploadRosterAdmin(roster, _selectedClub.Id);
         }
         catch (JsonParseException e)
@@ -174,6 +180,13 @@
     {
         try
         {
+            if (_roundNumber is null || _roundDescription is null || _roundDate is null || _rosterDueDate is null ||
+                _rosterDueTime is null || _removeDueDate is null || _removeDueTime is null)
+            {
+                SnackBar.Add("Not all fields are set, try again", Severity.Error);
+                return;
+            }
+            
             await Round.CreateRound(_roundNumber.Value, _roundDescription.Value, _roundDate, 
                 _rosterDueDate, _rosterDueTime, _removeDueDate, 
                 _removeDueTime);

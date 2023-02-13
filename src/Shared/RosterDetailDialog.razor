@@ -36,10 +36,10 @@
 @code {
 
     [CascadingParameter]
-    MudDialogInstance MudDialog { get; set; }
+    public required MudDialogInstance MudDialog { get; set; }
 
     [Parameter]
-    public List<Fencer> Fencers { get; set; }
+    public required List<Fencer> Fencers { get; set; }
     
     [Parameter]
     public long RosterId { get; set; }

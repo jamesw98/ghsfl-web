@@ -4,6 +4,6 @@ namespace GhsflUtils.Shared;
 
 public class AuthProvider
 {
-    public string AccessToken { get; set; }
-    public Club UserClub { get; set; }
+    public required string AccessToken { get; set; }
+    public required Club UserClub { get; set; }
 }
