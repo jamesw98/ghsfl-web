@@ -1,0 +1,53 @@
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using GhsflUtils.Services
+
+@inject AuthProvider Auth
+@inject IAccessTokenProvider TokenProvider
+@inject ClubService Clubs
+
+<CascadingValue Name="AccessToken" Value="AccessToken">
+    <CascadingAuthenticationState>
+        <Router AppAssembly="@typeof(App).Assembly">
+            <Found Context="routeData">
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                    <NotAuthorized>
+                        @if (context.User.Identity?.IsAuthenticated != true)
+                        {
+                            <RedirectToLogin/>
+                        }
+                        else
+                        {
+                            <p role="alert">You are not authorized to access this resource.</p>
+                        }
+                    </NotAuthorized>
+                </AuthorizeRouteView>
+                <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
+            </Found>
+            <NotFound>
+                <PageTitle>Not found</PageTitle>
+                <LayoutView Layout="@typeof(MainLayout)">
+                    <p role="alert">Sorry, there's nothing at this address.</p>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    </CascadingAuthenticationState>
+</CascadingValue>
+
+@code{
+    [Parameter] 
+    public string AccessToken { get; set; }
+    
+    [Parameter]
+    public string Token { get; set; }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var x = await TokenProvider.RequestAccessToken();
+        if (x.TryGetToken(out var token))
+        {
+            Auth.AccessToken = token.Value;
+            Auth.UserClub = await Clubs.GetMyClub();
+            Console.WriteLine(Auth.AccessToken);
+        }
+    }
+}

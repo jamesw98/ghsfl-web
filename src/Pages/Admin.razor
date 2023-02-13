@@ -1,0 +1,208 @@
+﻿@page "/admin"
+@using GhsflUtils.Services
+@using System.Net
+@using GhsflUtils.Enums
+@using GhsflUtils.Exceptions
+@using GhsflUtils.Models
+
+@inject CsvService Csv
+@inject PointsService Points
+@inject ClubService Clubs
+@inject RosterService Roster
+@inject RoundService Round
+@inject ISnackbar SnackBar
+
+<MudContainer MaxWidth="MaxWidth.Large">
+    <MudText Typo="Typo.h2" Align="Align.Center">
+        GHSFL Admin Utilities
+    </MudText>
+</MudContainer>
+
+<AuthorizeView>
+    <Authorized>
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <MudText Typo="Typo.h4">Create Round</MudText>
+            <MudTextField T="int" Label="Round Number" Required="true" @ref="_roundNumber"/>
+            <MudTextField T="string" Label="Round Description" Required="true" @ref="_roundDescription"/>
+            <MudDatePicker Label="Round Date" @bind-Text="_roundDate"/>
+            <br/>
+            <MudDatePicker Label="Roster Due Date Deadline" @bind-Text="_rosterDueDate"/>
+            <MudTimePicker Label="Roster Due Time Deadline" AmPm="true" @bind-Text="_rosterDueTime"></MudTimePicker>
+            <br/>
+            <MudDatePicker Label="Remove Due Date Deadline" @bind-Text="_removeDueDate"/>
+            <MudTimePicker Label="Remove Due Time Deadline" AmPm="true" @bind-Text="_removeDueTime"></MudTimePicker>
+            <br/>
+            <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateRound">Create Round</MudButton>
+        </MudContainer>
+        <br/>
+        <br/>
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <MudText Typo="Typo.h4">Update points</MudText>
+            <MudDivider/>
+            <div class="d-flex">
+                <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile">
+                    <ButtonTemplate Context="uploadContext">
+                        <MudButton HtmlTag="label"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.CloudUpload"
+                                   for="@uploadContext">
+                            Upload Results
+                        </MudButton>
+                    </ButtonTemplate>
+                </MudFileUpload>
+            </div>
+        </MudContainer>
+        <br/>
+        <br/>
+        <MudContainer MaxWidth="MaxWidth.Large">
+            @if (_clubs.Any())
+            {
+                <MudText Typo="Typo.h4">Upload roster for school</MudText>
+                <MudDivider/>
+                <MudSelect @bind-Value="_selectedClub" Label="Club to submit for">
+                    @foreach (var c in _clubs)
+                    {
+                        <MudSelectItem T="Club" Value="@c">@c.Name</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudSelect @bind-Value="_gender" Label="Gender for the roster">
+                    <MudSelectItem T="Genders" Value="@Genders.Male"/>
+                    <MudSelectItem T="Genders" Value="@Genders.Female"/>
+                </MudSelect>
+                <MudSelect @bind-Value="_round" Label="Round for the roster">
+                    @for (var i = 1; i < 8; i++)
+                    {
+                        <MudSelectItem T="int" Value="@i"/>
+                    }
+                </MudSelect>
+                <MudFileUpload T="IBrowserFile" FilesChanged="UploadRosterFile">
+                    <ButtonTemplate Context="uploadRosterContext">
+                        <MudButton HtmlTag="label"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.CloudUpload"
+                                   for="@uploadRosterContext">
+                            Upload Roster for School
+                        </MudButton>
+                    </ButtonTemplate>
+                </MudFileUpload>
+            }
+        </MudContainer>
+    </Authorized>
+    <NotAuthorized>
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <MudText Typo="Typo.h2" Align="Align.Center">
+                You are not authorized to view this page.
+            </MudText>
+        </MudContainer>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    private List<Club> _clubs = new();
+    private Club _selectedClub;
+    private Genders _gender;
+    private int _round;
+
+    private MudTextField<string> _roundDescription;
+    private MudTextField<int> _roundNumber;
+    private string _roundDate;
+    private string _rosterDueDate;
+    private string _rosterDueTime;
+    private string _removeDueDate;
+    private string _removeDueTime;
+
+    private async Task UploadFile(IBrowserFile file)
+    {
+        var results = await Csv.ReadPointsCsvFtl(file);
+
+        HttpStatusCode response;
+        try
+        {
+            response = await Points.PostPoints(results);
+        }
+        catch (HttpRequestException)
+        {
+            SnackBar.Add("Could not connect to api", Severity.Error);
+            return;
+        }
+
+        if (response != HttpStatusCode.OK)
+            SnackBar.Add($"An error occured: {response}", Severity.Error);
+        else
+            SnackBar.Add("Successfully updated points", Severity.Success);
+    }
+
+    private async Task UploadRosterFile(IBrowserFile file)
+    {
+        RosterSubmission roster;
+        try
+        {
+            roster = await Csv.ReadRosterFile(file, _gender, _round);
+        }
+        catch (ImportException)
+        {
+            SnackBar.Add("An error occured reading the csv file", Severity.Error);
+            return;
+        }
+        catch (Exception e)
+        {
+            SnackBar.Add($"An unexpected error occured\n{e.Message}", Severity.Error);
+            return;
+        }
+
+        List<Fencer> newFencers = new();
+        try
+        {
+            newFencers = await Roster.UploadRosterAdmin(roster, _selectedClub.Id);
+        }
+        catch (JsonParseException e)
+        {
+            SnackBar.Add(e.Message, Severity.Error);
+        }
+        catch (ApiException e)
+        {
+            SnackBar.Add(e.Message, Severity.Error);
+        }
+
+        SnackBar.Add($"Successfully uploaded rosters: {string.Join(", ", newFencers)}");
+    }
+
+    private async Task CreateRound()
+    {
+        try
+        {
+            await Round.CreateRound(_roundNumber.Value, _roundDescription.Value, _roundDate, 
+                _rosterDueDate, _rosterDueTime, _removeDueDate, 
+                _removeDueTime);
+            SnackBar.Add($"Successfully created {_roundDescription.Value}");
+        }
+        catch (JsonParseException e)
+        {
+            SnackBar.Add(e.Message, Severity.Error);
+        }
+        catch (ApiException e)
+        {
+            SnackBar.Add(e.Message, Severity.Error);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _clubs = await Clubs.GetAllClubs();
+        }
+        catch (JsonParseException e)
+        {
+            SnackBar.Add(e.Message, Severity.Error);
+        }
+        catch (ApiException e)
+        {
+            SnackBar.Add($"{e.Message}", Severity.Error);
+        }
+    }
+
+}

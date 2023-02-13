@@ -1,0 +1,37 @@
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject NavigationManager Navigation
+
+<MudNavMenu>
+    <MudNavLink Href="/" Match="NavLinkMatch.All">Home</MudNavLink>
+    <MudNavLink Href="/points" Match="NavLinkMatch.Prefix">Points</MudNavLink>
+    <AuthorizeView>
+        <Authorized>
+            <MudNavLink Href="/rosters" Match="NavLinkMatch.Prefix">Rosters</MudNavLink>
+            <MudNavLink Href="/claims" Match="NavLinkMatch.Prefix">My Fencers</MudNavLink>
+            <MudNavLink Match="NavLinkMatch.Prefix" @onclick="Logout">Logout</MudNavLink>
+        </Authorized>
+    </AuthorizeView>
+    <AuthorizeView>
+        <NotAuthorized>
+            <MudNavLink Href="/authentication/login" Match="NavLinkMatch.Prefix">Login</MudNavLink>
+        </NotAuthorized>
+    </AuthorizeView>
+</MudNavMenu>
+
+
+@code {
+    private bool collapseNavMenu = false;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    
+    private void Logout()
+    {
+        Navigation.NavigateToLogout("authentication/logout");
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+}

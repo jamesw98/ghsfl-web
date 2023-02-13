@@ -1,0 +1,68 @@
+﻿@using GhsflUtils.Models
+@using GhsflUtils.Services
+@using GhsflUtils.Exceptions
+
+@inject RosterService Rosters
+@inject ISnackbar Snackbar
+
+<MudDialog DisableSidePadding="true">
+    <DialogContent>
+        <MudContainer Style="max-height: 500px; overflow-y: scroll">
+            <MudTable Context="fencersContext" Items="@Fencers">
+                <HeaderContent>
+                    <MudTh>First</MudTh>
+                    <MudTh>Last</MudTh>
+                    <MudTh>Remove</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@fencersContext.FirstName</MudTd>
+                    <MudTd>@fencersContext.LastName</MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                       Color="Color.Error"
+                                       Variant="Variant.Filled"
+                                       OnClick="() => { RemoveFencer(fencersContext); }"/>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" OnClick="() => { MudDialog.Close(); }">Close</MudButton>
+        <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="SaveChanges" Disabled="!_fencersToRemove.Any()">Save Changes</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public List<Fencer> Fencers { get; set; }
+    
+    [Parameter]
+    public long RosterId { get; set; }
+
+    private List<long> _fencersToRemove = new();
+
+    public void RemoveFencer(Fencer fencer)
+    {
+        _fencersToRemove.Add(fencer.Id);
+        Fencers.Remove(fencer);
+    }
+    
+    public async Task SaveChanges()
+    {
+        try
+        {
+            await Rosters.RemoveFencersFromRoster(RosterId, _fencersToRemove);
+            _fencersToRemove.Clear();
+            MudDialog.Close();
+        }
+        catch (ApiException ae)
+        {
+            Snackbar.Add($"An error occured: {ae.Message}", Severity.Error);
+        }
+    }
+}
