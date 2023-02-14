@@ -6,13 +6,13 @@ namespace GhsflUtils.Services;
 
 public class PointsService : GhsflService
 {
-    public PointsService(HttpClient client, AuthProvider auth) : base(client, auth)
+    public PointsService(IConfiguration config, HttpClient client, AuthProvider auth) : base(config, client, auth)
     {
     }
 
     public async Task<HttpStatusCode> PostPoints(List<Result> results)
     {
-        var request = CreateRequest<List<Result>>(HttpMethod.Post, "https://localhost:7284/api/points", true, results);
+        var request = CreateRequest<List<Result>>(HttpMethod.Post, "points", true, results);
         return await GetResponseNoContent(request);
     }
 }

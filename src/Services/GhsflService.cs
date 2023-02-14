@@ -1,5 +1,4 @@
-﻿
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
 using GhsflUtils.Shared;
 using System.Net.Http.Headers;
@@ -9,11 +8,15 @@ namespace GhsflUtils.Services;
 
 public class GhsflService
 {
+    private string _baseUrl;
+    
     protected HttpClient Client;
     protected AuthProvider Auth;
-
-    protected GhsflService(HttpClient client, AuthProvider auth)
+    
+    protected GhsflService(IConfiguration config, HttpClient client, AuthProvider auth)
     {
+        _baseUrl = config.GetConnectionString("GhsflApi");
+        
         Client = client;
         Auth = auth;
     }
@@ -29,7 +32,7 @@ public class GhsflService
     /// <returns>an http request message</returns>
     protected HttpRequestMessage CreateRequest<T>(HttpMethod method, string uri, bool authenticated, T? content)
     {
-        var request = new HttpRequestMessage(method, uri);
+        var request = new HttpRequestMessage(method, $"{_baseUrl}{uri}");
         request.Headers.TryAddWithoutValidation("accept", "*/*");
         
         if (authenticated)
