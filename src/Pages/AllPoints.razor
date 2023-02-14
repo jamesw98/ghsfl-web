@@ -1,0 +1,44 @@
+@page "/points"
+@using GhsflUtils.Models
+@using GhsflUtils.Services
+
+@inject PointsService PointsService
+@inject ClubService ClubService
+
+@if (_results != null && _clubs != null)
+{
+    <MudContainer MaxWidth="MaxWidth.Large">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h5">Men</MudText>
+            <FencerTable
+                Fencers="_results.Men"
+                AllClubs="_clubs"
+                IncludeClub="true"/>
+        </MudPaper>
+        <br/>
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h5">Women</MudText>
+            <FencerTable
+                Fencers="_results.Women"
+                AllClubs="_clubs"
+                IncludeClub="true"/>
+        </MudPaper>
+    </MudContainer>
+}
+else
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+}
+
+@code {
+
+    private PointsResult? _results;
+    private List<Club>? _clubs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _results = await PointsService.GetPointsStanding();
+        _clubs = await ClubService.GetAllClubs();
+    }
+
+}

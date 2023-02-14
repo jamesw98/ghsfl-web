@@ -1,0 +1,48 @@
+@using GhsflUtils.Models
+@using GhsflUtils.Services
+
+@inject ClubService Clubs
+
+<MudTable @ref="_table" Items="Fencers" Breakpoint="Breakpoint.Md" RowsPerPage="10">
+    <HeaderContent>
+        <MudTh>Firstname</MudTh>
+        <MudTh>Lastname</MudTh>
+        @if (IncludeClub)
+        {
+            <MudTh>Club</MudTh>
+        }
+        <MudTh>Points</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTh>@context.FirstName</MudTh>
+        <MudTh>@context.LastName</MudTh>
+        @if (IncludeClub)
+        {
+            <MudTh>@AllClubs.First(x => x.Id == context.ClubId).Name</MudTh>
+        }
+        <MudTh>@(context.Points ?? 0)</MudTh>
+    </RowTemplate>
+    <PagerContent>
+        <MudPagination SelectedChanged="PageChanged" Count="@((_table.GetFilteredItemsCount() + _table.RowsPerPage - 1) / _table.RowsPerPage)" Class="pa-4"/>
+    </PagerContent>
+</MudTable>
+
+@code {
+    
+    private MudTable<Fencer> _table = new();
+
+    [Parameter]
+    public bool IncludeClub { get; set; }
+
+    [Parameter]
+    public required IEnumerable<Fencer> Fencers { get; set; }
+
+    [Parameter]
+    public required IEnumerable<Club> AllClubs { get; set; }
+    
+    private void PageChanged(int i)
+    {
+        _table.NavigateTo(i - 1);
+    }
+
+}
