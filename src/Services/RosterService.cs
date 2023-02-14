@@ -11,7 +11,7 @@ public class RosterService : GhsflService
     
     public async Task RemoveFencersFromRoster(long rosterId, List<long> fencerIds)
     {
-        var request = CreateRequest<List<long>>(HttpMethod.Put, $"{rosterId}/fencers", true, fencerIds);
+        var request = CreateRequest<List<long>>(HttpMethod.Put, $"roster/{rosterId}/fencers", true, fencerIds);
         await GetResponseNoContent(request);
     }
 
