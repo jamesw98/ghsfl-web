@@ -6,13 +6,13 @@ namespace GhsflUtils.Services;
 
 public class RoundService : GhsflService
 {
-    public RoundService(HttpClient client, AuthProvider auth) : base(client, auth)
+    public RoundService(IConfiguration config, HttpClient client, AuthProvider auth) : base(config, client, auth)
     {
     }
 
     public async Task<List<Round>> GetRounds()
     {
-        var request = CreateRequest<string>(HttpMethod.Get, "https://localhost:7284/api/round/", false, null);
+        var request = CreateRequest<string>(HttpMethod.Get, "round", false, null);
         return await GetResponse<List<Round>>(request);
     }
 
@@ -29,7 +29,7 @@ public class RoundService : GhsflService
             RemoveByDate = DateTime.Parse($"{removeDate} {removeTime}")
         };
 
-        var request = CreateRequest<Round>(HttpMethod.Post, "https://localhost:7284/api/round/", true, round);
+        var request = CreateRequest<Round>(HttpMethod.Post, "round", true, round);
         return await GetResponseNoContent(request);
     }
 }
