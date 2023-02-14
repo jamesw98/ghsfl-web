@@ -30,11 +30,11 @@ jobs:
     
     # copy index.html to 404.html to serve the same file when a file is not found
     - name: copy index.html to 404.html
-      run: cp release/wwwroot/index.html release/wwwroot/404.html
+      run: cp release/src/wwwroot/index.html release/src/wwwroot/404.html
 
     # add .nojekyll file to tell GitHub pages to not treat this as a Jekyll project. (Allow files and folders starting with an underscore)
     - name: Add .nojekyll file
-      run: touch release/wwwroot/.nojekyll
+      run: touch release/src/wwwroot/.nojekyll
       
       
     - name: Commit wwwroot to GitHub Pages
@@ -42,4 +42,4 @@ jobs:
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BRANCH: gh-pages
-        FOLDER: release/wwwroot
+        FOLDER: release/src/wwwroot
