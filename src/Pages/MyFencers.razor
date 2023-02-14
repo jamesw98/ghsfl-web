@@ -4,47 +4,28 @@
 @using GhsflUtils.Enums
 
 @inject FencerService FencerService
+@inject ClubService ClubService
 
 <AuthorizeView>
     <NotAuthorized>
         <NotAuthorizedMessage/>
     </NotAuthorized>
     <Authorized>
-        @if (_myFencers != null)
+        @if (_myFencers != null && _clubs != null)
         {
             <MudContainer MaxWidth="MaxWidth.Large">
                 <MudPaper Class="pa-4">
                     <MudText Typo="Typo.h5">Men</MudText>
-                    <MudTable Items="_myFencers.Where(f => f.Gender == Genders.Male)"
-                              Breakpoint="Breakpoint.Md"
-                              Context="men">
-                        <HeaderContent>
-                            <MudTh>Firstname</MudTh>
-                            <MudTh>Lastname</MudTh>
-                            <MudTh>Points</MudTh>
-                        </HeaderContent>
-                        <RowTemplate>
-                            <MudTh>@men.FirstName</MudTh>
-                            <MudTh>@men.LastName</MudTh>
-                            <MudTh>@(men.Points ?? 0)</MudTh>
-                        </RowTemplate>
-                    </MudTable>
+                    <FencerTable
+                        Fencers="_myFencers.Where(f => f.Gender == Genders.Male)"
+                        AllClubs="_clubs"
+                        IncludeClub="false"/>
                     <br/>
                     <MudText Typo="Typo.h5">Women</MudText>
-                    <MudTable Items="_myFencers.Where(f => f.Gender == Genders.Female)"
-                              Breakpoint="Breakpoint.Md"
-                              Context="women">
-                        <HeaderContent>
-                            <MudTh>Firstname</MudTh>
-                            <MudTh>Lastname</MudTh>
-                            <MudTh>Points</MudTh>
-                        </HeaderContent>
-                        <RowTemplate>
-                            <MudTh>@women.FirstName</MudTh>
-                            <MudTh>@women.LastName</MudTh>
-                            <MudTh>@(women.Points ?? 0)</MudTh>
-                        </RowTemplate>
-                    </MudTable>
+                    <FencerTable
+                        Fencers="_myFencers.Where(f => f.Gender == Genders.Female)"
+                        AllClubs="_clubs"
+                        IncludeClub="false"/>
                 </MudPaper>
             </MudContainer>
         }
@@ -52,7 +33,7 @@
         {
             <MudContainer MaxWidth="MaxWidth.Large">
                 <MudPaper Class="pa-4">
-                    <MudProgressCircular Color="Color.Primary"/>
+                    <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
                 </MudPaper>
             </MudContainer>
         }
@@ -62,10 +43,12 @@
 @code {
 
     private List<Fencer>? _myFencers;
+    private List<Club>? _clubs;
 
     protected override async Task OnInitializedAsync()
     {
         _myFencers = await FencerService.GetFencersForUser();
+        _clubs = await ClubService.GetAllClubs();
     }
 
 }
