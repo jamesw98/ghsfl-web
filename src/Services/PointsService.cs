@@ -12,7 +12,7 @@ public class PointsService : GhsflService
 
     public async Task<PointsResult> GetPointsStanding()
     {
-        var request = CreateRequest<string>(HttpMethod.Get, "https://localhost:7284/api/points", false, null);
+        var request = CreateRequest<string>(HttpMethod.Get, "points", false, null);
         return await GetResponse<PointsResult>(request);
     }
 
