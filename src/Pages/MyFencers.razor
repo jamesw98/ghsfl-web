@@ -19,13 +19,15 @@
                     <FencerTable
                         Fencers="_myFencers.Where(f => f.Gender == Genders.Male)"
                         AllClubs="_clubs"
-                        IncludeClub="false"/>
+                        IncludeClub="false"
+                        IncludePlace="false"/>
                     <br/>
                     <MudText Typo="Typo.h5">Women</MudText>
                     <FencerTable
                         Fencers="_myFencers.Where(f => f.Gender == Genders.Female)"
                         AllClubs="_clubs"
-                        IncludeClub="false"/>
+                        IncludeClub="false"
+                        IncludePlace="false"/>
                 </MudPaper>
             </MudContainer>
         }

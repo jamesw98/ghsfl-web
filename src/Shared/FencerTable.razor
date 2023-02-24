@@ -5,6 +5,10 @@
 
 <MudTable @ref="_table" Items="Fencers" Breakpoint="Breakpoint.Md" RowsPerPage="10">
     <HeaderContent>
+        @if (IncludePlace)
+        {
+            <MudTh>Place</MudTh>
+        }
         <MudTh>Firstname</MudTh>
         <MudTh>Lastname</MudTh>
         @if (IncludeClub)
@@ -14,6 +18,10 @@
         <MudTh>Points</MudTh>
     </HeaderContent>
     <RowTemplate>
+        @if (IncludePlace)
+        {
+            <MudTh>@context.Place</MudTh>
+        }
         <MudTh>@context.FirstName</MudTh>
         <MudTh>@context.LastName</MudTh>
         @if (IncludeClub)
@@ -28,8 +36,11 @@
 </MudTable>
 
 @code {
-    
+
     private MudTable<Fencer> _table = new();
+
+    [Parameter]
+    public bool IncludePlace { get; set; }
 
     [Parameter]
     public bool IncludeClub { get; set; }
@@ -39,7 +50,7 @@
 
     [Parameter]
     public required IEnumerable<Club> AllClubs { get; set; }
-    
+
     private void PageChanged(int i)
     {
         _table.NavigateTo(i - 1);
