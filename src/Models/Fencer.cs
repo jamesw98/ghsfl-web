@@ -5,6 +5,7 @@ namespace GhsflUtils.Models;
 public class Fencer
 {
     public long Id { get; set; }
+    public string Place { get; set; } = null!;
     public string FirstName { get; set; } = null!;
     public string LastName { get; set; } = null!;
     public long? Points { get; set; }
