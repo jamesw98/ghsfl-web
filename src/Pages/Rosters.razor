@@ -46,14 +46,15 @@
                                 }
                             </MudTd>
                             <MudTd>
-                                <MudFileUpload T="IBrowserFile" FilesChanged="async file => { await SubmitRoster(file, rosterContext.RoundNumber, Genders.Male); }">
+                                <MudFileUpload T="IBrowserFile" 
+                                               FilesChanged="async file => { await SubmitRoster(file, rosterContext.RoundNumber, Genders.Male, rosterContext.SubmitByDate); }">
                                     <ButtonTemplate Context="uploadContext">
                                         <MudButton HtmlTag="label"
                                                    Variant="Variant.Filled"
                                                    Color="Color.Tertiary"
                                                    StartIcon="@Icons.Material.Filled.CloudUpload"
                                                    for="@uploadContext">
-                                            @(_rosters.Any(x => x.Round == @rosterContext.RoundNumber && x.Gender == Genders.Male) ? "Reupload" : "Upload")
+                                            @(_rosters.Any(x => x.Round == rosterContext.RoundNumber && x.Gender == Genders.Male) ? "Reupload" : "Upload")
                                         </MudButton>
                                     </ButtonTemplate>
                                 </MudFileUpload>
@@ -61,7 +62,7 @@
                             <MudTd>
                                 <MudIconButton Icon="@Icons.Material.Filled.RemoveRedEye" Variant="Variant.Filled"
                                                OnClick="async () => { await ViewRoster(_rosters.First(x => x.Round == rosterContext.RoundNumber && x.Gender == Genders.Male).Id); }"
-                                               Disabled="@(!_rosters.Any(x => x.Round == @rosterContext.RoundNumber && x.Gender == Genders.Male))"/>
+                                               Disabled="@(!_rosters.Any(x => x.Round == rosterContext.RoundNumber && x.Gender == Genders.Male))"/>
                             </MudTd>
                             <MudTd>
                                 @if (_rosters.Any(x => x.Round == @rosterContext.RoundNumber && x.Gender == Genders.Female))
@@ -74,14 +75,15 @@
                                 }
                             </MudTd>
                             <MudTd>
-                                <MudFileUpload T="IBrowserFile" FilesChanged="async file => { await SubmitRoster(file, rosterContext.RoundNumber, Genders.Female); }">
+                                <MudFileUpload T="IBrowserFile" 
+                                               FilesChanged="async file => { await SubmitRoster(file, rosterContext.RoundNumber, Genders.Female, rosterContext.SubmitByDate); }">
                                     <ButtonTemplate Context="uploadContext">
                                         <MudButton HtmlTag="label"
                                                    Variant="Variant.Filled"
                                                    Color="Color.Tertiary"
                                                    StartIcon="@Icons.Material.Filled.CloudUpload"
                                                    for="@uploadContext">
-                                            @(_rosters.Any(x => x.Round == @rosterContext.RoundNumber && x.Gender == Genders.Female) ? "Reupload" : "Upload")
+                                            @(_rosters.Any(x => x.Round == rosterContext.RoundNumber && x.Gender == Genders.Female) ? "Reupload" : "Upload")
                                         </MudButton>
                                     </ButtonTemplate>
                                 </MudFileUpload>
@@ -89,7 +91,7 @@
                             <MudTd>
                                 <MudIconButton Icon="@Icons.Material.Filled.RemoveRedEye" Variant="Variant.Filled"
                                                OnClick="async () => { await ViewRoster(_rosters.First(x => x.Round == rosterContext.RoundNumber && x.Gender == Genders.Female).Id); }"
-                                               Disabled="@(!_rosters.Any(x => x.Round == @rosterContext.RoundNumber && x.Gender == Genders.Female))"/>
+                                               Disabled="@(!_rosters.Any(x => x.Round == rosterContext.RoundNumber && x.Gender == Genders.Female))"/>
                             </MudTd>
                             <MudTd>@rosterContext.SubmitByDate</MudTd>
                         </RowTemplate>
@@ -123,7 +125,7 @@
         DialogService.Show<RosterDetailDialog>($"Roster Round {roundId}", parameters, options);
     }
 
-    private async Task SubmitRoster(IBrowserFile file, long round, Genders gender)
+    private async Task SubmitRoster(IBrowserFile file, long round, Genders gender, DateTime submitDeadline)
     {
         RosterSubmission submission;
         try
@@ -136,11 +138,14 @@
             return;
         }
 
-        List<Fencer> newFencers;
         try
         {
-            newFencers = await Roster.UploadRoster(submission);
+            var newFencers = await Roster.UploadRoster(submission);
             Snackbar.Add($"Success! The following fencers were not already in the database and have been added:\n{string.Join(", ", newFencers)}", Severity.Success);
+            
+            if (DateTime.Now > submitDeadline)
+                Snackbar.Add("This roster was been submitted past the deadline! If this has not been approved by the TC this roster will not be counted!", Severity.Error);
+            
             StateHasChanged();
         }
         catch (JsonParseException e)

@@ -1,9 +1,11 @@
 @page "/points"
 @using GhsflUtils.Models
 @using GhsflUtils.Services
+@using GhsflUtils.Exceptions
 
 @inject PointsService PointsService
 @inject ClubService ClubService
+@inject ISnackbar Snackbar
 
 @if (_results != null && _clubs != null)
 {
@@ -37,8 +39,19 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _results = await PointsService.GetPointsStanding();
-        _clubs = await ClubService.GetAllClubs();
+        try
+        {
+            _results = await PointsService.GetPointsStanding();
+            _clubs = await ClubService.GetAllClubs();    
+        }
+        catch (JsonParseException e)
+        {
+            Snackbar.Add(e.Message, Severity.Error);
+        }
+        catch (ApiException e)
+        {
+            Snackbar.Add(e.Message, Severity.Error);
+        }
     }
 
 }

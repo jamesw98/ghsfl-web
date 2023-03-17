@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Text.Json;
 using GhsflUtils.Shared;
 using System.Net.Http.Headers;
@@ -76,20 +77,27 @@ public class GhsflService
     /// <exception cref="JsonParseException">if the response couldn't be parsed</exception>
     protected async Task<T> GetResponse<T>(HttpRequestMessage request)
     {
-        var rawResponse = await Client.SendAsync(request);
-        
-        if (!rawResponse.IsSuccessStatusCode)
-            throw new ApiException($"An error occured: {rawResponse.StatusCode}");
+        try
+        {
+            var rawResponse = await Client.SendAsync(request);
 
-        var response = JsonSerializer.Deserialize<T>(await rawResponse.Content.ReadAsStringAsync(),
-            options: new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-        
-        if (response == null)
-            throw new JsonParseException("Could not parse response");
-        
-        return response;
+            if (!rawResponse.IsSuccessStatusCode)
+                throw new ApiException($"An error occured: {rawResponse.StatusCode}");
+
+            var response = JsonSerializer.Deserialize<T>(await rawResponse.Content.ReadAsStringAsync(),
+                options: new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            if (response == null)
+                throw new JsonParseException("Could not parse response");
+
+            return response;
+        }
+        catch (HttpRequestException)
+        {
+            throw new ApiException("Could not connect to the API, contact site admin.");
+        }
     }
 }
