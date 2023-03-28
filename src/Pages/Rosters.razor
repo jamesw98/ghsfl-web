@@ -118,15 +118,29 @@
 
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
 
-        var parameters = new DialogParameters();
-        parameters.Add("Fencers", roster.Fencers);
-        parameters.Add("RosterId", roster.Id);
+        var parameters = new DialogParameters
+        {
+            { "Fencers", roster.Fencers },
+            { "RosterId", roster.Id }
+        };
 
         DialogService.Show<RosterDetailDialog>($"Roster Round {roundId}", parameters, options);
     }
 
     private async Task SubmitRoster(IBrowserFile file, long round, Genders gender, DateTime submitDeadline)
     {
+        var late = DateTime.Now > submitDeadline;
+        var veryLate = (DateTime.Now - submitDeadline).Days > 3;
+
+        if (veryLate)
+        {
+            Snackbar.Add("You are attempting to submit a roster significantly past the deadline, this is not allowed.", Severity.Error);
+            return;
+        }
+
+        if (late)
+            Snackbar.Add("This roster submission attempting is after the deadline! It might not count as a submission!", Severity.Error);
+        
         RosterSubmission submission;
         try
         {
@@ -142,10 +156,6 @@
         {
             var newFencers = await Roster.UploadRoster(submission);
             Snackbar.Add($"Success! The following fencers were not already in the database and have been added:\n{string.Join(", ", newFencers)}", Severity.Success);
-            
-            if (DateTime.Now > submitDeadline)
-                Snackbar.Add("This roster was been submitted past the deadline! If this has not been approved by the TC this roster will not be counted!", Severity.Error);
-            
             StateHasChanged();
         }
         catch (JsonParseException e)
