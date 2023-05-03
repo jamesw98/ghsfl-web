@@ -161,22 +161,25 @@
         try
         {
             var newFencers = await Roster.UploadRoster(submission);
-            
-            var options = new DialogOptions
-            {
-                CloseButton = true, 
-                MaxWidth = MaxWidth.Medium, 
-                FullWidth = true
-            };
 
-            var parameters = new DialogParameters
+            if (newFencers.Any())
             {
-                { "Fencers", newFencers },
-            };
+                var options = new DialogOptions
+                {
+                    CloseButton = true, 
+                    MaxWidth = MaxWidth.Medium, 
+                    FullWidth = true
+                };
 
-            DialogService.Show<NewFencerDialog>("New Fencers", parameters, options);
+                var parameters = new DialogParameters
+                {
+                    { "Fencers", newFencers },
+                };
             
-            // Snackbar.Add($"Success! The following fencers were not already in the database and have been added:\n{string.Join(", ", newFencers)}", Severity.Success);
+                DialogService.Show<NewFencerDialog>("New Fencers", parameters, options);
+            }
+            
+            Snackbar.Add($"Success! Roster submitted.", Severity.Success);
             _rosters = await Roster.GetRostersForSchool(); 
             StateHasChanged();
         }
