@@ -9,4 +9,6 @@ public class Club
     public long? MenPoints { get; set; }
 
     public long? WomenPoints { get; set; }
+    
+    public bool IsAdmin { get; set; }
 }

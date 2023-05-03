@@ -12,83 +12,91 @@
 @inject RoundService Round
 @inject ISnackbar SnackBar
 
-<MudContainer MaxWidth="MaxWidth.Large">
-    <MudText Typo="Typo.h2" Align="Align.Center">
-        GHSFL Admin Utilities
-    </MudText>
-</MudContainer>
+@inject AuthProvider AuthProvider
 
 <AuthorizeView>
     <Authorized>
-        <MudContainer MaxWidth="MaxWidth.Large">
-            <MudText Typo="Typo.h4">Create Round</MudText>
-            <MudTextField T="int" Label="Round Number" Required="true" @ref="_roundNumber"/>
-            <MudTextField T="string" Label="Round Description" Required="true" @ref="_roundDescription"/>
-            <MudDatePicker Label="Round Date" @bind-Text="_roundDate"/>
+        @if (AuthProvider.UserClub.IsAdmin)
+        {
+            <MudContainer MaxWidth="MaxWidth.Large">
+                <MudText Typo="Typo.h2" Align="Align.Center">
+                    GHSFL Admin Utilities
+                </MudText>
+            </MudContainer>
+            <MudContainer MaxWidth="MaxWidth.Large">
+                <MudText Typo="Typo.h4">Create Round</MudText>
+                <MudTextField T="int" Label="Round Number" Required="true" @ref="_roundNumber"/>
+                <MudTextField T="string" Label="Round Description" Required="true" @ref="_roundDescription"/>
+                <MudDatePicker Label="Round Date" @bind-Text="_roundDate"/>
+                <br/>
+                <MudDatePicker Label="Roster Due Date Deadline" @bind-Text="_rosterDueDate"/>
+                <MudTimePicker Label="Roster Due Time Deadline" AmPm="true" @bind-Text="_rosterDueTime"></MudTimePicker>
+                <br/>
+                <MudDatePicker Label="Remove Due Date Deadline" @bind-Text="_removeDueDate"/>
+                <MudTimePicker Label="Remove Due Time Deadline" AmPm="true" @bind-Text="_removeDueTime"></MudTimePicker>
+                <br/>
+                <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateRound">Create Round</MudButton>
+            </MudContainer>
             <br/>
-            <MudDatePicker Label="Roster Due Date Deadline" @bind-Text="_rosterDueDate"/>
-            <MudTimePicker Label="Roster Due Time Deadline" AmPm="true" @bind-Text="_rosterDueTime"></MudTimePicker>
             <br/>
-            <MudDatePicker Label="Remove Due Date Deadline" @bind-Text="_removeDueDate"/>
-            <MudTimePicker Label="Remove Due Time Deadline" AmPm="true" @bind-Text="_removeDueTime"></MudTimePicker>
-            <br/>
-            <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateRound">Create Round</MudButton>
-        </MudContainer>
-        <br/>
-        <br/>
-        <MudContainer MaxWidth="MaxWidth.Large">
-            <MudText Typo="Typo.h4">Update points</MudText>
-            <MudDivider/>
-            <div class="d-flex">
-                <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile">
-                    <ButtonTemplate Context="uploadContext">
-                        <MudButton HtmlTag="label"
-                                   Variant="Variant.Filled"
-                                   Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.CloudUpload"
-                                   for="@uploadContext">
-                            Upload Results
-                        </MudButton>
-                    </ButtonTemplate>
-                </MudFileUpload>
-            </div>
-        </MudContainer>
-        <br/>
-        <br/>
-        <MudContainer MaxWidth="MaxWidth.Large">
-            @if (_clubs.Any())
-            {
-                <MudText Typo="Typo.h4">Upload roster for school</MudText>
+            <MudContainer MaxWidth="MaxWidth.Large">
+                <MudText Typo="Typo.h4">Update points</MudText>
                 <MudDivider/>
-                <MudSelect @bind-Value="_selectedClub" Label="Club to submit for">
-                    @foreach (var c in _clubs)
-                    {
-                        <MudSelectItem T="Club" Value="@c">@c.Name</MudSelectItem>
-                    }
-                </MudSelect>
-                <MudSelect @bind-Value="_gender" Label="Gender for the roster">
-                    <MudSelectItem T="Genders" Value="@Genders.Male"/>
-                    <MudSelectItem T="Genders" Value="@Genders.Female"/>
-                </MudSelect>
-                <MudSelect @bind-Value="_round" Label="Round for the roster">
-                    @for (var i = 1; i < 8; i++)
-                    {
-                        <MudSelectItem T="int" Value="@i"/>
-                    }
-                </MudSelect>
-                <MudFileUpload T="IBrowserFile" FilesChanged="UploadRosterFile">
-                    <ButtonTemplate Context="uploadRosterContext">
-                        <MudButton HtmlTag="label"
-                                   Variant="Variant.Filled"
-                                   Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.CloudUpload"
-                                   for="@uploadRosterContext">
-                            Upload Roster for School
-                        </MudButton>
-                    </ButtonTemplate>
-                </MudFileUpload>
-            }
-        </MudContainer>
+                <div class="d-flex">
+                    <MudFileUpload T="IBrowserFile" FilesChanged="UploadFile">
+                        <ButtonTemplate Context="uploadContext">
+                            <MudButton HtmlTag="label"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                                       for="@uploadContext">
+                                Upload Results
+                            </MudButton>
+                        </ButtonTemplate>
+                    </MudFileUpload>
+                </div>
+            </MudContainer>
+            <br/>
+            <br/>
+            <MudContainer MaxWidth="MaxWidth.Large">
+                @if (_clubs.Any())
+                {
+                    <MudText Typo="Typo.h4">Upload roster for school</MudText>
+                    <MudDivider/>
+                    <MudSelect @bind-Value="_selectedClub" Label="Club to submit for">
+                        @foreach (var c in _clubs)
+                        {
+                            <MudSelectItem T="Club" Value="@c">@c.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudSelect @bind-Value="_gender" Label="Gender for the roster">
+                        <MudSelectItem T="Genders" Value="@Genders.Male"/>
+                        <MudSelectItem T="Genders" Value="@Genders.Female"/>
+                    </MudSelect>
+                    <MudSelect @bind-Value="_round" Label="Round for the roster">
+                        @for (var i = 1; i < 8; i++)
+                        {
+                            <MudSelectItem T="int" Value="@i"/>
+                        }
+                    </MudSelect>
+                    <MudFileUpload T="IBrowserFile" FilesChanged="UploadRosterFile">
+                        <ButtonTemplate Context="uploadRosterContext">
+                            <MudButton HtmlTag="label"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                                       for="@uploadRosterContext">
+                                Upload Roster for School
+                            </MudButton>
+                        </ButtonTemplate>
+                    </MudFileUpload>
+                }
+            </MudContainer>
+        }
+        else
+        {
+            <NotAuthorizedMessage/>
+        }
     </Authorized>
     <NotAuthorized>
         <MudContainer MaxWidth="MaxWidth.Large">
@@ -186,9 +194,9 @@
                 SnackBar.Add("Not all fields are set, try again", Severity.Error);
                 return;
             }
-            
-            await Round.CreateRound(_roundNumber.Value, _roundDescription.Value, _roundDate, 
-                _rosterDueDate, _rosterDueTime, _removeDueDate, 
+
+            await Round.CreateRound(_roundNumber.Value, _roundDescription.Value, _roundDate,
+                _rosterDueDate, _rosterDueTime, _removeDueDate,
                 _removeDueTime);
             SnackBar.Add($"Successfully created {_roundDescription.Value}");
         }
