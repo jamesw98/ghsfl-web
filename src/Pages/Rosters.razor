@@ -46,7 +46,7 @@
                                 }
                             </MudTd>
                             <MudTd>
-                                <MudFileUpload T="IBrowserFile" 
+                                <MudFileUpload T="IBrowserFile"
                                                FilesChanged="async file => { await SubmitRoster(file, rosterContext.RoundNumber, Genders.Male, rosterContext.SubmitByDate); }">
                                     <ButtonTemplate Context="uploadContext">
                                         <MudButton HtmlTag="label"
@@ -75,7 +75,7 @@
                                 }
                             </MudTd>
                             <MudTd>
-                                <MudFileUpload T="IBrowserFile" 
+                                <MudFileUpload T="IBrowserFile"
                                                FilesChanged="async file => { await SubmitRoster(file, rosterContext.RoundNumber, Genders.Female, rosterContext.SubmitByDate); }">
                                     <ButtonTemplate Context="uploadContext">
                                         <MudButton HtmlTag="label"
@@ -116,7 +116,12 @@
     {
         var roster = await Roster.GetRoster(roundId);
 
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var options = new DialogOptions
+        {
+            CloseButton = true, 
+            MaxWidth = MaxWidth.Medium, 
+            FullWidth = true
+        };
 
         var parameters = new DialogParameters
         {
@@ -156,6 +161,7 @@
         {
             var newFencers = await Roster.UploadRoster(submission);
             Snackbar.Add($"Success! The following fencers were not already in the database and have been added:\n{string.Join(", ", newFencers)}", Severity.Success);
+            _rosters = await Roster.GetRostersForSchool(); 
             StateHasChanged();
         }
         catch (JsonParseException e)
