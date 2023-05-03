@@ -1,0 +1,33 @@
+@using GhsflUtils.Models
+
+<MudDialog DisableSidePadding="true">
+    <DialogContent>
+        <MudContainer Style="max-height: 500px; overflow-y: scroll">
+            <MudText Typo="Typo.body1">
+                These fencers were not found in the database.
+                If this is the first event they're fencing this season, this is expected.
+                If not, check the spelling of their names, if may be different from when submitted before.
+            </MudText>
+            <MudTable Context="fencersContext" Items="@Fencers">
+                <HeaderContent>
+                    <MudTh>First</MudTh>
+                    <MudTh>Last</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@fencersContext.FirstName</MudTd>
+                    <MudTd>@fencersContext.LastName</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudContainer>
+    </DialogContent>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    public required MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public required List<Fencer> Fencers { get; set; }
+
+}

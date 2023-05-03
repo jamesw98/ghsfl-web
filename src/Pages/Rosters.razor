@@ -3,6 +3,7 @@
 @using GhsflUtils.Services
 @using GhsflUtils.Enums
 @using GhsflUtils.Exceptions
+@using GhsflUtils.Shared.Dialogs
 
 @inject AuthProvider Auth 
 @inject RosterService Roster
@@ -112,9 +113,9 @@
         _rounds = await Round.GetRounds();
     }
 
-    private async Task ViewRoster(long roundId)
+    private async Task ViewRoster(long rosterId)
     {
-        var roster = await Roster.GetRoster(roundId);
+        var roster = await Roster.GetRoster(rosterId);
 
         var options = new DialogOptions
         {
@@ -129,7 +130,7 @@
             { "RosterId", roster.Id }
         };
 
-        DialogService.Show<RosterDetailDialog>($"Roster Round {roundId}", parameters, options);
+        DialogService.Show<RosterDetailDialog>($"{roster.Gender} Roster Round {roster.Round}", parameters, options);
     }
 
     private async Task SubmitRoster(IBrowserFile file, long round, Genders gender, DateTime submitDeadline)
@@ -160,7 +161,22 @@
         try
         {
             var newFencers = await Roster.UploadRoster(submission);
-            Snackbar.Add($"Success! The following fencers were not already in the database and have been added:\n{string.Join(", ", newFencers)}", Severity.Success);
+            
+            var options = new DialogOptions
+            {
+                CloseButton = true, 
+                MaxWidth = MaxWidth.Medium, 
+                FullWidth = true
+            };
+
+            var parameters = new DialogParameters
+            {
+                { "Fencers", newFencers },
+            };
+
+            DialogService.Show<NewFencerDialog>("New Fencers", parameters, options);
+            
+            // Snackbar.Add($"Success! The following fencers were not already in the database and have been added:\n{string.Join(", ", newFencers)}", Severity.Success);
             _rosters = await Roster.GetRostersForSchool(); 
             StateHasChanged();
         }
